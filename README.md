@@ -21,7 +21,9 @@ That has a direct, measurable business cost:
 - **Users leave before the page loads.** Bounce rate climbs sharply with every extra second of load time; the traffic you paid to acquire never sees your product.
 - **It gets worse silently.** Nobody ships a 900 KB bundle on purpose. It arrives one dependency at a time, and by the time it's a problem it's expensive to unwind.
 
-CodeVitals exists to catch that drift while it's still cheap to fix — and to explain it in terms a non-engineer can act on.
+**AI-assisted development makes this faster.** Agents generate code and reach for dependencies quickly and confidently, and nothing in the loop is watching total weight. The tooling that made shipping cheaper did not make *measuring* cheaper — so the drift accelerates while the feedback stays manual.
+
+CodeVitals exists to catch that drift while it's still cheap to fix — to explain it in terms a non-engineer can act on, and to hand an agent the numbers it is currently guessing at.
 
 > **The name is the thesis.** Google measures your *Web* Vitals — what users experience. CodeVitals measures the *code* that produces them, before you ship.
 
@@ -63,6 +65,8 @@ Once published:
 npx codevitals
 ```
 
+**Running it from an AI agent.** CodeVitals is read-only and needs no configuration to start, so an agent can invoke it directly as a shell command and parse the result. Structured `--output json` arrives in Phase 5; until then agents read the same human output you do.
+
 ---
 
 ## What it looks like
@@ -87,7 +91,7 @@ velocity; lightweight governance is sufficient.
 ----------------------------------------
 ```
 
-One command, two reports. The engineer gets the numbers; the stakeholder gets the decision.
+One command, two reports. The engineer gets the numbers; the stakeholder gets the decision. A third form — the machine-readable contract for AI agents — lands in Phase 5 from this same analysis.
 
 ---
 
@@ -107,6 +111,8 @@ CodeVitals classifies your project into a lifecycle tier and adjusts what it exp
 Promotion uses **OR logic** — crossing *either* the line budget *or* the JavaScript budget moves you up a tier. A small codebase that ships a bloated bundle is still a performance problem, and CodeVitals treats it as one.
 
 Every threshold above is a default you can change.
+
+The tier is also the signal an AI agent needs to calibrate itself: the same suggestion that is right for a Seed prototype is wrong for a Scale codebase. An agent that knows the tier can match its own strictness to the project instead of applying one policy everywhere.
 
 > Initial-JS budgets are configurable today; the measurement that fills them lands in Phase 2. Phase 1 classifies on source lines.
 
@@ -147,7 +153,7 @@ A path can also be passed positionally.
 
 CodeVitals installs **nothing** at runtime. Directory walking is `node:fs`, argument parsing is `node:util`, tests run on `node:test`. TypeScript and `tsx` are dev-only and never reach a consumer's machine.
 
-A tool that audits your bundle weight has no business adding to it.
+A tool that audits your bundle weight has no business adding to it. It also means an AI agent can invoke CodeVitals without pulling a supply chain into the project it is working on.
 
 ---
 
@@ -158,7 +164,9 @@ A tool that audits your bundle weight has no business adding to it.
 3. **Classify** — measurements are compared against tier budgets with OR logic.
 4. **Report** — one analysis, formatted for two audiences.
 
-Strictly layered: `reporters → core → config → types`. Pure static analysis — CodeVitals never writes to your source and never injects anything into your bundle.
+Strictly layered: `reporters → core → config → types`. Pure static analysis — CodeVitals never writes to your source and never injects anything into your bundle, which is what makes it safe to hand to an autonomous agent.
+
+Steps 1-3 are deliberately free of any machine-specific behaviour. That is what lets two runs be compared — by you across commits, or by an agent checking whether its own change helped.
 
 ---
 
