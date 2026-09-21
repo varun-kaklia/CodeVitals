@@ -1,6 +1,6 @@
-# CodeVitals — Codebase Governance CLI & AI Agent Skill for TypeScript and JavaScript
+# CodeVitals — Codebase Governance CLI & AI Agent Skill for Any Codebase
 
-**Ship a lighter, faster website — and keep it that way as your codebase grows.** CodeVitals is a zero-dependency CLI *and* a machine-readable skill for AI coding agents. It measures how heavy your code and your shipped JavaScript bundle are, tells you in plain language what that costs your users, and gets stricter automatically as your project scales.
+**Ship a lighter, faster website — and keep it that way as your codebase grows.** CodeVitals is a zero-dependency CLI *and* a machine-readable skill for AI coding agents. The measurement core is language-neutral; JavaScript and TypeScript get the deepest support, because bundle weight is where code size turns directly into user-visible slowness. It measures how heavy your code and your shipped JavaScript bundle are, tells you in plain language what that costs your users, and gets stricter automatically as your project scales.
 
 [![Status: Phase 1](https://img.shields.io/badge/status-phase%201-orange)](#roadmap)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
@@ -118,6 +118,27 @@ The tier is also the signal an AI agent needs to calibrate itself: the same sugg
 
 ---
 
+## Language support
+
+CodeVitals separates what it measures from what it understands.
+
+**Language-neutral** — counting, tier classification, history and the agent contract work on any source tree. Nothing in the walker, counter or classifier knows what language it is reading; they operate on files and lines.
+
+**JavaScript and TypeScript deepest** — bundle weight, tree-shaking readiness and import-graph analysis need ecosystem-specific inputs (a bundler metafile, a language parser), so those land for JS/TS first.
+
+| Capability | Scope |
+|---|---|
+| Source-line counting and lifecycle tiers | Any language |
+| Config, ignore rules, dual reports | Any language |
+| History and trend tracking *(Phase 3)* | Any language |
+| Machine-readable agent contract *(Phase 5)* | Any language |
+| Bundle weight and tree-shaking *(Phase 2)* | Web / JS bundlers |
+| AST import graph *(Phase 4)* | Per-language parser; JS/TS first |
+
+> **Today:** the analyzed extension list defaults to `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` and is not yet overridable from the config file. Making it configurable is the next change — the walker already accepts an extension set, it just isn't wired to config. Until then, non-JS codebases need that one field to be useful.
+
+---
+
 ## Configuration
 
 Drop a `codevitals.config.json` into the directory you're scanning:
@@ -202,9 +223,9 @@ Intended shape of the contract:
 | Phase | What it adds | Why it matters commercially | Status |
 |-------|--------------|------------------------------|--------|
 | **1** | Source-code measurement, lifecycle tiers, config, dual reports | Establishes the baseline and the tier system | ✅ Shipping |
-| **2** | Bundle weight & tree-shaking readiness from esbuild/Rollup/Vite metafiles | Measures what users actually download — the number that moves LCP and search ranking | Planned |
+| **2** | Bundle weight & tree-shaking readiness from esbuild/Rollup/Vite metafiles *(web/JS)* | Measures what users actually download — the number that moves LCP and search ranking | Planned |
 | **3** | Git-backed history and trend tracking | Catches regressions the week they land, not the quarter they hurt | Planned |
-| **4** | AST import graph — circular dependencies, barrel bloat, oversized modules | Finds the structural causes of a heavy bundle, not just the symptom | Planned |
+| **4** | AST import graph — circular dependencies, barrel bloat, oversized modules *(per-language parser, JS/TS first)* | Finds the structural causes of a heavy bundle, not just the symptom | Planned |
 | **5** | Machine-readable `.codevitals.json` contract, JSON output, CI gate | Lets AI coding agents and CI act on the data automatically | Planned |
 
 Phase 2 reads your bundler's existing metafile rather than running a build itself — faster, and it can't disagree with your real production output.
@@ -237,8 +258,11 @@ It runs in CI today. Exit-code gating and JSON output arrive in Phase 5.
 **Can my AI coding agent use this?**
 That's a primary design goal. Phase 5 ships a versioned `.codevitals.json` contract so agents such as Claude Code, Cursor or Copilot can read real measurements instead of inferring code health from whatever is in their context window. Today the CLI is human-readable output; an agent can still run it and parse the text, but the stable machine contract is Phase 5. See [For AI coding agents](#for-ai-coding-agents--the-machine-readable-skill).
 
-**Which languages?**
-TypeScript and JavaScript, including JSX/TSX and both module formats.
+**Does it work with Python, Go, Rust or anything else?**
+The measurement core is language-neutral — counting lines, classifying a tier and tracking history care about files, not syntax. What is JS-specific is the *depth*: bundle analysis needs a bundler, and import-graph analysis needs a language parser. See [Language support](#language-support). Note the extension list is not configurable yet, which is the one thing standing between the architecture and the claim.
+
+**Which languages are analyzed today?**
+TypeScript and JavaScript out of the box, including JSX/TSX and both module formats.
 
 ---
 
@@ -258,4 +282,4 @@ MIT © varun
 
 ---
 
-<sub>**Keywords:** codebase governance, AI agent skill, AI code review, LLM tooling, machine-readable code metrics, web performance optimization, Core Web Vitals, LCP optimization, bundle size analyzer, JavaScript bundle size, tree shaking, page speed optimization, technical SEO, code health CLI, static analysis, lines of code counter, TypeScript code quality, technical debt tracking, code complexity, CI performance budget, AI agent code analysis, zero dependency CLI.</sub>
+<sub>**Keywords:** codebase governance, language-agnostic code metrics, polyglot codebase analysis, AI agent skill, AI code review, LLM tooling, machine-readable code metrics, web performance optimization, Core Web Vitals, LCP optimization, bundle size analyzer, JavaScript bundle size, tree shaking, page speed optimization, technical SEO, code health CLI, static analysis, lines of code counter, TypeScript code quality, technical debt tracking, code complexity, CI performance budget, AI agent code analysis, zero dependency CLI.</sub>
