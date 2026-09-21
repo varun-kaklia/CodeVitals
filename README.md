@@ -1,4 +1,4 @@
-# CodeVitals — Codebase Health & Web Performance Governance for TypeScript and JavaScript
+# CodeVitals — Codebase Governance CLI & AI Agent Skill for TypeScript and JavaScript
 
 **Ship a lighter, faster website — and keep it that way as your codebase grows.** CodeVitals is a zero-dependency CLI *and* a machine-readable skill for AI coding agents. It measures how heavy your code and your shipped JavaScript bundle are, tells you in plain language what that costs your users, and gets stricter automatically as your project scales.
 
@@ -27,7 +27,7 @@ CodeVitals exists to catch that drift while it's still cheap to fix — and to e
 
 ---
 
-## What you get
+## Built for humans and agents
 
 **For developers**
 Deterministic numbers — file counts, source lines, bundle bytes. Same input, same output, every run, every machine. No opinions, no heuristics, nothing to argue with in review.
@@ -36,7 +36,7 @@ Deterministic numbers — file counts, source lines, bundle bytes. Same input, s
 A traffic-light health status and a plain-English recommendation. No jargon, no reading a config file to understand whether things are OK.
 
 **For AI coding agents**
-A deterministic, versioned JSON contract instead of guesswork. Agents like Claude Code, Cursor and Copilot can read your real measurements — tier, line counts, bundle bytes, findings — and act on evidence rather than inferring code health from whatever files happen to be in context. *(Ships in Phase 5; see [For AI coding agents](#for-ai-coding-agents).)*
+A deterministic, versioned JSON contract instead of guesswork. Agents like Claude Code, Cursor and Copilot can read your real measurements — tier, line counts, bundle bytes, findings — and act on evidence rather than inferring code health from whatever files happen to be in context. *(Ships in Phase 5; see [For AI coding agents](#for-ai-coding-agents--the-machine-readable-skill).)*
 
 **For your users**
 Less JavaScript shipped, faster first paint, better Core Web Vitals, better search ranking.
@@ -91,7 +91,7 @@ One command, two reports. The engineer gets the numbers; the stakeholder gets th
 
 ---
 
-## Governance that grows with you
+## Progressive governance that grows with you
 
 Most quality tools apply the same strictness on day one as on day one thousand. A 400-line prototype gets audited like a 400,000-line monolith, so teams either drown in warnings or switch the tool off.
 
@@ -162,7 +162,7 @@ Strictly layered: `reporters → core → config → types`. Pure static analysi
 
 ---
 
-## For AI coding agents
+## For AI coding agents — the machine-readable skill
 
 AI agents are good at writing code and bad at knowing whether a codebase is getting heavier. They see the files in their context window, not the shape of the whole repository — so "is this refactor making things worse?" is a question they currently answer by guessing.
 
@@ -189,7 +189,7 @@ Intended shape of the contract:
 
 ---
 
-## Roadmap
+## Roadmap — from measurement to autonomous optimization
 
 | Phase | What it adds | Why it matters commercially | Status |
 |-------|--------------|------------------------------|--------|
@@ -227,7 +227,7 @@ That's what the Product Owner summary is for — traffic-light status and a plai
 It runs in CI today. Exit-code gating and JSON output arrive in Phase 5.
 
 **Can my AI coding agent use this?**
-That's a primary design goal. Phase 5 ships a versioned `.codevitals.json` contract so agents such as Claude Code, Cursor or Copilot can read real measurements instead of inferring code health from whatever is in their context window. Today the CLI is human-readable output; an agent can still run it and parse the text, but the stable machine contract is Phase 5. See [For AI coding agents](#for-ai-coding-agents).
+That's a primary design goal. Phase 5 ships a versioned `.codevitals.json` contract so agents such as Claude Code, Cursor or Copilot can read real measurements instead of inferring code health from whatever is in their context window. Today the CLI is human-readable output; an agent can still run it and parse the text, but the stable machine contract is Phase 5. See [For AI coding agents](#for-ai-coding-agents--the-machine-readable-skill).
 
 **Which languages?**
 TypeScript and JavaScript, including JSX/TSX and both module formats.
