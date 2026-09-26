@@ -8,6 +8,12 @@ import { formatDeveloperReport } from "./reporters/developer.js";
 import { formatProductOwnerReport } from "./reporters/productOwner.js";
 import { parseArgs } from "node:util"
 import { handleCliError } from "./cliError.js";
+import { createRequire } from "node:module";
+
+// Single source of truth for the version. Both src/cli.ts and dist/cli.js sit
+// one directory below package.json, so the same relative path works whether
+// this runs through tsx or from the built output.
+const { version } = createRequire(import.meta.url)("../package.json") as { version: string };
 
 let parsed;
 try {
@@ -30,7 +36,7 @@ if (values.help) {
 }
 
 if (values.version) {
-  console.log("codevitals v0.1.1");
+  console.log(`codevitals v${version}`);
   process.exit(0);
 }
 
