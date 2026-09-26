@@ -30,7 +30,7 @@ if (values.help) {
 }
 
 if (values.version) {
-  console.log("codevitals v0.1.0");
+  console.log("codevitals v0.1.1");
   process.exit(0);
 }
 
@@ -39,7 +39,7 @@ const resolvedDir = path.resolve(process.cwd(), targetPath);
 
 try {
   const config = await loadConfig(resolvedDir);
-  const files = await walkDirectory(resolvedDir, { ignore: config.ignore });
+  const files = await walkDirectory(resolvedDir, { ignore: config.ignore, extensions: config.extensions });
 
   const locReport = await countLoc(files);
   const tier = classifyTier(locReport.totalSourceLines, 0, config.tiers);

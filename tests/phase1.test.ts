@@ -10,6 +10,7 @@ import { deepMergeConfig, sanitizeUserConfig, loadConfig } from "../src/config/l
 import { DEFAULT_CONFIG } from "../src/config/defaults.js";
 import { CodeVitalError } from "../src/core/errors.js";
 import { formatDeveloperReport } from "../src/reporters/developer.js";
+import { walkDirectory } from "../src/core/walker.js";
 
 // =======================================================
 // Suite 1: Lines of Code (LOC) Counter
@@ -75,7 +76,7 @@ describe("config/loader sanitize and merge", () => {
     const raw = {
       ignore: "not-an-array", // Should be stripped
       tiers: {
-        seed: { maxLoc: "invalid-string", maxInitialJsBytes: -50 }, // Both invalid!
+        seed: { maxLoc: "invalid-string", maxInitialBytes: -50 }, // Both invalid!
       },
     };
     const sanitized = sanitizeUserConfig(raw);
@@ -96,10 +97,10 @@ describe("config/loader sanitize and merge", () => {
     // seed.maxLoc was overridden to 20,000
     assert.equal(merged.tiers.seed.maxLoc, 20_000);
 
-    // seed.maxInitialJsBytes should retain its DEFAULT value!
+    // seed.maxInitialBytes should retain its DEFAULT value!
     assert.equal(
-      merged.tiers.seed.maxInitialJsBytes,
-      DEFAULT_CONFIG.tiers.seed.maxInitialJsBytes
+      merged.tiers.seed.maxInitialBytes,
+      DEFAULT_CONFIG.tiers.seed.maxInitialBytes
     );
 
     // growth should remain intact
@@ -120,6 +121,47 @@ describe("config/loader sanitize and merge", () => {
 
     // enterprise is not in ConfigurableTier so it is discarded
     assert.equal((merged.tiers as any).enterprise, undefined);
+  });
+
+  test("extensions REPLACE the defaults rather than unioning with them", () => {
+    const user = sanitizeUserConfig({ extensions: [".py"] });
+    const merged = deepMergeConfig(DEFAULT_CONFIG, user);
+
+    // Someone analysing Python wants .py INSTEAD of the JS defaults.
+    // This is deliberately the opposite of how `ignore` merges - do not
+    // "fix" it to union, that would make non-JS codebases uncountable.
+    assert.deepEqual(merged.extensions, [".py"]);
+    assert.ok(!merged.extensions.includes(".ts"));
+  });
+
+  test("extensions are normalized to lowercase dot-prefixed form", () => {
+    // path.extname() always returns a leading dot and the walker lowercases
+    // it, so "py" / ".GO" / " .rs " would silently match nothing unnormalized.
+    const clean = sanitizeUserConfig({ extensions: ["py", ".GO", " .rs "] });
+
+    assert.deepEqual(clean.extensions, [".py", ".go", ".rs"]);
+  });
+
+  test("non-string extension entries are dropped at the trust boundary", () => {
+    const clean = sanitizeUserConfig({ extensions: [123, "", true, ".ts", "   "] as any });
+
+    assert.deepEqual(clean.extensions, [".ts"]);
+  });
+
+  test("an omitted extensions field leaves the defaults untouched", () => {
+    const merged = deepMergeConfig(DEFAULT_CONFIG, sanitizeUserConfig({ ignore: ["tmp"] }));
+
+    assert.deepEqual(merged.extensions, DEFAULT_CONFIG.extensions);
+  });
+
+  test("a valid maxInitialBytes override survives sanitization", () => {
+    // Regression guard: the sanitizer once read the pre-rename key, so a valid
+    // value was silently dropped and the default used instead. Every other test
+    // here feeds this field invalid input, which passes either way.
+    const clean = sanitizeUserConfig({ tiers: { seed: { maxInitialBytes: 204_800 } } });
+    const merged = deepMergeConfig(DEFAULT_CONFIG, clean);
+
+    assert.equal(merged.tiers.seed.maxInitialBytes, 204_800);
   });
 
   test("Issue #6 guard: malformed JSON config file throws CodeVitalError", async () => {
@@ -162,7 +204,7 @@ describe("reporters/developer", () => {
   test("Issue #12 guard: number formatting is locale-independent", () => {
     const out = formatDeveloperReport({
       tier: "scale",
-      thresholds: { maxLoc: 150_000, maxInitialJsBytes: 1024 * 1024 },
+      thresholds: { maxLoc: 150_000, maxInitialBytes: 1024 * 1024 },
       locReport,
     });
 
@@ -178,3 +220,43 @@ describe("reporters/developer", () => {
     assert.match(out, /ENTERPRISE/);
   });
 });
+
+// =======================================================
+// Suite 5: End-to-end language neutrality
+// =======================================================
+describe("cli/walk end-to-end", () => {
+  test("a configured extension list decides which files are counted", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "codevitals-lang-"));
+    try {
+      await fs.writeFile(path.join(tempDir, "a.py"), "x = 1\n", "utf-8");
+      await fs.writeFile(path.join(tempDir, "b.py"), "y = 2\n", "utf-8");
+      await fs.writeFile(path.join(tempDir, "c.ts"), "const a = 1;\n", "utf-8");
+
+      // Defaults: JS/TS only, so the two Python files are invisible.
+      const defaults = await loadConfig(tempDir);
+      const tsOnly = await walkDirectory(tempDir, {
+        ignore: defaults.ignore,
+        extensions: defaults.extensions,
+      });
+      assert.equal(tsOnly.length, 1);
+
+      // Same tree, Python config. Note the unnormalized "py" and the junk
+      // entry - both are handled before the walker ever sees them.
+      await fs.writeFile(
+        path.join(tempDir, "codevitals.config.json"),
+        JSON.stringify({ extensions: ["py", 123] }),
+        "utf-8"
+      );
+      const pyConfig = await loadConfig(tempDir);
+      const pyOnly = await walkDirectory(tempDir, {
+        ignore: pyConfig.ignore,
+        extensions: pyConfig.extensions,
+      });
+      assert.equal(pyOnly.length, 2);
+      assert.ok(pyOnly.every((f) => f.endsWith(".py")));
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+});
+

@@ -22,15 +22,15 @@ export function classifyTier(
 ): TierName {
 
     // Check scale tier threshold first (escalates to enterprise)
-    if (loc > tiers.scale.maxLoc || initialBytes > tiers.scale.maxInitialJsBytes) {
+    if (loc > tiers.scale.maxLoc || initialBytes > tiers.scale.maxInitialBytes) {
         return 'enterprise'
     }
     // Check growth tier threshold (escalates to scale)
-    if (loc > tiers.growth.maxLoc || initialBytes > tiers.growth.maxInitialJsBytes) {
+    if (loc > tiers.growth.maxLoc || initialBytes > tiers.growth.maxInitialBytes) {
         return 'scale';
     }
     // Check seed tier threshold (escalates to growth)
-    if (loc > tiers.seed.maxLoc || initialBytes > tiers.seed.maxInitialJsBytes) {
+    if (loc > tiers.seed.maxLoc || initialBytes > tiers.seed.maxInitialBytes) {
         return 'growth';
     }
     // Otherwise, remains within seed
