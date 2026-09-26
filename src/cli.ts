@@ -30,7 +30,7 @@ if (values.help) {
 }
 
 if (values.version) {
-  console.log("codevitals v0.1.0");
+  console.log("codevitals v0.1.1");
   process.exit(0);
 }
 

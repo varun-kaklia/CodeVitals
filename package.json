@@ -1,6 +1,6 @@
 {
   "name": "codevitals",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A progressive codebase governance CLI tool and machine-readable AI skill. It monitors architectural rot, bundle weight, tree-shaking readiness, and code complexity.",
   "keywords": [
     "ast-analysis",
