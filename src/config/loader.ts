@@ -5,6 +5,15 @@ import { DEFAULT_CONFIG } from "./defaults.js";
 import { CodeVitalError } from "../core/errors.js";
 
 /**
+ * Normalizes one extension to lowercase, dot-prefixed form, so ".TS", "ts"
+ * and " .ts " all match what path.extname() returns.
+ */
+function normalizeExtension(ext: string): string {
+    const trimmed = ext.trim().toLowerCase();
+    return trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
+}
+
+/**
  * Pure function: deeply merges user overrides on top of the base configuration
  */
 export function deepMergeConfig(
@@ -19,7 +28,13 @@ export function deepMergeConfig(
         },
         ignore: override.ignore
             ? Array.from(new Set([...base.ignore, ...override.ignore]))
-            : base.ignore
+            : base.ignore,
+        // REPLACE, don't union. Someone analysing Python wants [".py"] INSTEAD
+        // of the JS defaults. `ignore` unions because you always want the
+        // built-in ignores; extensions are the opposite case.
+        extensions: override.extensions && override.extensions.length > 0
+            ? Array.from(new Set(override.extensions))
+            : base.extensions,
     }
     return result;
 }
@@ -55,6 +70,12 @@ export function sanitizeUserConfig(raw: unknown): UserCodeVitalsConfig {
         );
     }
 
+    if (Array.isArray(input.extensions)) {
+        sanitized.extensions = input.extensions
+            .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+            .map(normalizeExtension);
+    }
+
     // 2. Validate EVERY tier
     if (typeof input.tiers === "object" && input.tiers !== null && !Array.isArray(input.tiers)) {
         const rawTiers = input.tiers as Record<string, unknown>;
@@ -72,9 +93,9 @@ export function sanitizeUserConfig(raw: unknown): UserCodeVitalsConfig {
                     threshold.maxLoc = t.maxLoc;
                 }
 
-                // Validate maxInitialJsBytes
-                if (isValidPositiveNumber(t.maxInitialJsBytes)) {
-                    threshold.maxInitialJsBytes = t.maxInitialJsBytes;
+                // Validate maxInitialBytes
+                if (isValidPositiveNumber(t.maxInitialBytes)) {
+                    threshold.maxInitialBytes = t.maxInitialBytes;
                 }
 
                 // Only attach if at least one valid property was provided

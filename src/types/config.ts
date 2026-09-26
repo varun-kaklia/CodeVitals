@@ -4,12 +4,14 @@ export type ConfigurableTier = Exclude<TierName, "enterprise">;
 export interface TierThreshold {
   /** Upper boundary for this tier before escalating to the next tier */
   maxLoc: number;
-  maxInitialJsBytes: number;
+  maxInitialBytes: number;
 }
 
 export interface CodeVitalsConfig {
   tiers: Record<ConfigurableTier, TierThreshold>;
   ignore: string[];
+  /** File extensions to analyze, lowercase and dot-prefixed (e.g. ".ts", ".py"). */
+  extensions: string[];
 }
 
 /**
@@ -18,10 +20,10 @@ export interface CodeVitalsConfig {
  */
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
-    ? U[] // If it's an array, keep it as an array of U, don't make items inside optional!
-    : T[P] extends object
-    ? DeepPartial<T[P]> // If it's a normal object, recurse
-    : T[P]; // Primitive (number, string, etc.)
+  ? U[] // If it's an array, keep it as an array of U, don't make items inside optional!
+  : T[P] extends object
+  ? DeepPartial<T[P]> // If it's a normal object, recurse
+  : T[P]; // Primitive (number, string, etc.)
 };
 
 export type UserCodeVitalsConfig = DeepPartial<CodeVitalsConfig>;

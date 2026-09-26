@@ -1,18 +1,23 @@
 import type { CodeVitalsConfig } from "../types/index.js";
 
+// Supported extensions for Phase 1
+export const DEFAULT_EXTENSIONS = [
+    ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
+];
+
 export const DEFAULT_CONFIG: CodeVitalsConfig = {
     tiers: {
         seed: {
             maxLoc: 15_000,
-            maxInitialJsBytes: 250 * 1024, // 250 KB
+            maxInitialBytes: 250 * 1024, // 250 KB
         },
         growth: {
             maxLoc: 50_000,
-            maxInitialJsBytes: 500 * 1024, // 500 KB
+            maxInitialBytes: 500 * 1024, // 500 KB
         },
         scale: {
             maxLoc: 150_000,
-            maxInitialJsBytes: 1024 * 1024, // 1 MB
+            maxInitialBytes: 1024 * 1024, // 1 MB
         },
     },
     ignore: [
@@ -25,14 +30,5 @@ export const DEFAULT_CONFIG: CodeVitalsConfig = {
         ".cache",
         ".turbo",
     ],
+    extensions: DEFAULT_EXTENSIONS
 };
-
-// Supported extensions for Phase 1
-export const DEFAULT_EXTENSIONS = new Set([
-    ".ts",
-    ".tsx",
-    ".js",
-    ".jsx",
-    ".mjs",
-    ".cjs",
-]);

@@ -4,7 +4,7 @@ import { DEFAULT_EXTENSIONS } from "../config/defaults.js";
 
 export interface WalkOptions {
     ignore?: string[];
-    extensions?: Set<string>;
+    extensions?: string[];
 }
 
 /**
@@ -21,7 +21,7 @@ export async function walkDirectory(
     options: WalkOptions = {}
 ): Promise<string[]> {
     const ignoreList = new Set(options.ignore ?? []);
-    const extensions = options.extensions ?? DEFAULT_EXTENSIONS;
+    const extensions = new Set(options.extensions ?? DEFAULT_EXTENSIONS);
     const result: string[] = [];
 
     async function walk(currentDir: string): Promise<void> {

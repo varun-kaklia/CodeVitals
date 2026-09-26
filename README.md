@@ -135,7 +135,13 @@ CodeVitals separates what it measures from what it understands.
 | Bundle weight and tree-shaking *(Phase 2)* | Web / JS bundlers |
 | AST import graph *(Phase 4)* | Per-language parser; JS/TS first |
 
-> **Today:** the analyzed extension list defaults to `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` and is not yet overridable from the config file. Making it configurable is the next change — the walker already accepts an extension set, it just isn't wired to config. Until then, non-JS codebases need that one field to be useful.
+**Analyzing another language** takes one config field:
+
+```json
+{ "extensions": [".py"] }
+```
+
+Extension values are normalized for you — `"py"`, `".PY"` and `" .rs "` all work. Unlike `ignore`, which merges with the built-in list, `extensions` **replaces** the defaults: a Python project wants `.py` *instead of* the JS extensions, not alongside them.
 
 ---
 
@@ -146,17 +152,18 @@ Drop a `codevitals.config.json` into the directory you're scanning:
 ```json
 {
   "tiers": {
-    "seed":   { "maxLoc": 8000, "maxInitialJsBytes": 204800 },
+    "seed":   { "maxLoc": 8000, "maxInitialBytes": 204800 },
     "growth": { "maxLoc": 40000 }
   },
-  "ignore": ["node_modules", "dist", "vendor", "generated"]
+  "ignore": ["node_modules", "dist", "vendor", "generated"],
+  "extensions": [".ts", ".tsx"]
 }
 ```
 
 Anything you leave out keeps its default. **Config is validated, not trusted** — a wrong type is dropped and the default survives, rather than silently corrupting your results. A string `"15000"` where a number belongs, a `null`, or an `ignore` that isn't an array will not quietly break your thresholds. Your `ignore` entries are added to the built-in list, never replace it.
 
 **Ignored by default:** `node_modules` · `.git` · `dist` · `build` · `coverage` · `.next` · `.cache` · `.turbo`
-**Analyzed:** `.ts` · `.tsx` · `.js` · `.jsx` · `.mjs` · `.cjs`
+**Analyzed by default:** `.ts` · `.tsx` · `.js` · `.jsx` · `.mjs` · `.cjs` — override with `extensions` for any other language
 
 ### CLI
 
