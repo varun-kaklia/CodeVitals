@@ -2,12 +2,13 @@
 
 **Ship a lighter, faster website — and keep it that way as your codebase grows.** CodeVitals is a zero-dependency CLI *and* a machine-readable skill for AI coding agents. The measurement core is language-neutral; JavaScript and TypeScript get the deepest support, because bundle weight is where code size turns directly into user-visible slowness. It measures how heavy your code and your shipped JavaScript bundle are, tells you in plain language what that costs your users, and gets stricter automatically as your project scales.
 
-[![Status: Phase 1](https://img.shields.io/badge/status-phase%201-orange)](#roadmap)
+[![Released: v0.1.1](https://img.shields.io/badge/released-v0.1.1-brightgreen)](https://github.com/varun-kaklia/CodeVitals/releases/tag/v0.1.1)
+[![In progress: Phase 2](https://img.shields.io/badge/in%20progress-phase%202%20·%20bundle%20weight-blue)](#roadmap--from-measurement-to-autonomous-optimization)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
 [![Node](https://img.shields.io/badge/node-%E2%89%A524-brightgreen)](#quick-start)
 [![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20deps-0-success)](#zero-dependencies)
 
-> **Status: Phase 1.** Source-code measurement and tier classification are shipping and tested. Bundle-weight analysis (the part that measures what your users actually download) is Phase 2. This README marks clearly what works today and what is planned — no vapourware.
+> **Status: v0.1.1 released · Phase 2 in progress.** Source-code measurement and tier classification ship today, tested and dogfooded. Phase 2 — bundle weight, the part that measures what your users actually download — is being built now on the [`phase-2`](https://github.com/varun-kaklia/CodeVitals/tree/phase-2) branch. This README marks clearly what works today and what is planned; nothing here describes a feature that does not exist.
 
 ---
 
@@ -230,12 +231,14 @@ Intended shape of the contract:
 | Phase | What it adds | Why it matters commercially | Status |
 |-------|--------------|------------------------------|--------|
 | **1** | Source-code measurement, lifecycle tiers, config, dual reports | Establishes the baseline and the tier system | ✅ Shipping |
-| **2** | Bundle weight & tree-shaking readiness from esbuild/Rollup/Vite metafiles *(web/JS)* | Measures what users actually download — the number that moves LCP and search ranking | Planned |
+| **2** | Bundle weight & tree-shaking readiness from esbuild/Rollup/Vite metafiles *(web/JS)* | Measures what users actually download — the number that moves LCP and search ranking | 🚧 **In progress** |
 | **3** | Git-backed history and trend tracking | Catches regressions the week they land, not the quarter they hurt | Planned |
 | **4** | AST import graph — circular dependencies, barrel bloat, oversized modules *(per-language parser, JS/TS first)* | Finds the structural causes of a heavy bundle, not just the symptom | Planned |
 | **5** | Machine-readable `.codevitals.json` contract, JSON output, CI gate | Lets AI coding agents and CI act on the data automatically | Planned |
 
 Phase 2 reads your bundler's existing metafile rather than running a build itself — faster, and it can't disagree with your real production output.
+
+**What Phase 2 is building.** A `--metafile` flag that ingests esbuild (and Rollup/Vite) build output, normalizes both into one internal shape, and sums only *entry* chunks into an initial-payload figure — async chunks load later and do not block first paint, so counting them would overstate the problem. That figure fills the `maxInitialBytes` budget the tier system already has, which is currently always zero: tier classification is LOC-only today, and Phase 2 is what makes the OR logic in the tier table real. Projects without a bundler stay fully supported — no metafile means bundle weight is reported as not measured, rather than assumed healthy.
 
 ---
 
